@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --site-max-w: 90rem;    /* 1440px — max-w-360 no Tailwind v4 */
 }
 
 @theme inline {

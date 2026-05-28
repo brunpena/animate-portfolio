@@ -66,6 +66,9 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-5">
 
+      {/* Container com largura máxima — logo e CTA absolutos ficam dentro dele */}
+      <div className="relative mx-auto flex w-full max-w-480 items-center justify-center px-10 lg:px-20">
+
       {/* ── Logo externo ─────────────────────────────────────── */}
       <Link
         href="/"
@@ -176,6 +179,8 @@ export default function Header() {
       >
         Ver Cardápio
       </button>
+
+      </div>{/* fim do container max-w-360 */}
     </header>
   )
 }
