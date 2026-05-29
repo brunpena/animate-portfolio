@@ -10,6 +10,7 @@ export default function AboutSection() {
         className="absolute top-0 left-0 w-full object-cover opacity-27"
         style={{ height: "calc(100% + 30rem)", objectPosition: "center 250%" }}
       />
+      
 
       <div className="relative z-10 w-full h-full flex items-center py-16">
         <div className="w-full max-w-360 mx-auto px-10 lg:px-20">
