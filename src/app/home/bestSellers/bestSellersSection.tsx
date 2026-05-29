@@ -4,7 +4,7 @@ import { products } from "@/data/products"
 export default function BestSellersSection() {
   return (
     <section
-      className="best-sellers-section relative z-0 bg-gray-100 w-full h-screen min-h-[45vh] overflow-hidden"
+      className="best-sellers-section relative z-0 bg-gray-100 w-full min-h-screen min-h-[45vh] overflow-hidden pt-[clamp(5rem,20vw,45rem)]"
       data-header-theme="best-sellers"
     >
       
