@@ -35,7 +35,7 @@ type Props = {
 export default function InformationBar({
   items,
   preset = 1,
-  speed = 60,
+  speed = 40,
   separator = "◆",
   className = "",
 }: Props) {
