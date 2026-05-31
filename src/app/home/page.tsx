@@ -2,7 +2,7 @@ import HeroSection from "./hero/heroSection";
 import AboutSection from "./about/aboutSection";
 import InformationBar from "@/components/informationBar/informationBarComponent";
 import BestSellersSection from "./bestSellers/bestSellersSection";
-import ProductCard from "@/components/productCard/productCardComponent";
+import ServicesSection from "./services/ServicesSection";
 
 export default function HomePage() {
   return (
@@ -16,6 +16,8 @@ export default function HomePage() {
       />
       <AboutSection />
       <BestSellersSection />
+      <ServicesSection />
+
       
     </main>
   )
