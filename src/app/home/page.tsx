@@ -3,6 +3,7 @@ import AboutSection from "./about/aboutSection";
 import InformationBar from "@/components/informationBar/informationBarComponent";
 import BestSellersSection from "./bestSellers/bestSellersSection";
 import ServicesSection from "./services/ServicesSection";
+import FirstContact from "./services/FirstContact/FirstContact.page";
 
 export default function HomePage() {
   return (
@@ -17,7 +18,7 @@ export default function HomePage() {
       <AboutSection />
       <BestSellersSection />
       <ServicesSection />
-
+      <FirstContact />
       
     </main>
   )
