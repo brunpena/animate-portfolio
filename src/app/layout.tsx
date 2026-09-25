@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import Header from "@/components/header/headerComponent";
 import Footer from "@/components/footer/footerComponent";
+import RevealOnScroll from "@/components/revealOnScroll/revealOnScrollComponent";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,10 +37,12 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col pt-16">
+      <body className="min-h-full flex flex-col pt-16 overflow-x-clip">
         <Header />
         {children}
         <Footer />
+        {/* Depois de tudo: os pins das seções já existem quando ele mede as posições */}
+        <RevealOnScroll />
       </body>
     </html>
   );
