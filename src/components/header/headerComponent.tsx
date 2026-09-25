@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { defaultTheme, headerThemes, type HeaderTheme } from "./headerThemes"
@@ -30,27 +31,49 @@ const visibleRatio = (el: Element) => {
   return Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0)) / r.height
 }
 
+const ArrowIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+    <path d="M3 8h10M9 4l4 4-4 4" />
+  </svg>
+)
+
 export default function Header() {
   const [island,      setIsland]      = useState(false)
   const [theme,       setTheme]       = useState<HeaderTheme>(defaultTheme)
   const [textVisible, setTextVisible] = useState(true)
   // Enquanto false, o primeiro estado é aplicado sem animação nenhuma
   const [mounted,     setMounted]     = useState(false)
+  // Menu hambúrguer (só existe abaixo de lg)
+  const [menuOpen,    setMenuOpen]    = useState(false)
   const themeRef = useRef<HeaderTheme>(defaultTheme)
+
+  const closeMenu = () => setMenuOpen(false)
+
+  // Esc fecha o menu mobile
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false)
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [menuOpen])
+
 
   // ── Island ──────────────────────────────────────────────────
   // Sem .hero-section na página, a ilha é o estado padrão
   useIsomorphicLayoutEffect(() => {
     const hero = document.querySelector(".hero-section")
 
-    const check = () => setIsland(!hero || hero.getBoundingClientRect().bottom <= 0)
-
-    check()
+    // Leitura síncrona só na abertura; depois o observer avisa quando o hero
+    // entra/sai da tela, sem medir layout a cada evento de scroll
+    setIsland(!hero || hero.getBoundingClientRect().bottom <= 0)
     setMounted(true)
 
     if (!hero) return // nada para observar: a ilha fica fixa
-    window.addEventListener("scroll", check, { passive: true })
-    return () => window.removeEventListener("scroll", check)
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsland(!entry.isIntersecting && entry.boundingClientRect.bottom <= 0)
+    })
+    observer.observe(hero)
+    return () => observer.disconnect()
   }, [])
 
   // ── Tema por section ─────────────────────────────────────────
@@ -100,11 +123,101 @@ export default function Header() {
 
   const motion = mounted ? SHAPE_TRANSITION : ""
 
+  const shellStyle = {
+    borderColor:     theme.navBorder,
+    backgroundColor: theme.navBg,
+    boxShadow:       theme.navShadow,
+    transition:      mounted ? NAV_TRANSITION : "none",
+  }
+
+  const linkStyle = {
+    color:         theme.linkColor,
+    fontFamily:    theme.fontFamily,
+    fontWeight:    theme.fontWeight,
+    letterSpacing: theme.letterSpacing,
+  }
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-5">
+    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center lg:py-5">
+
+      {/* ── Mobile: barra fixa com logo + hambúrguer ─────────────── */}
+      <div className="w-full lg:hidden">
+        <div
+          style={{
+            borderColor:     theme.navBorder,
+            backgroundColor: theme.navBg,
+            boxShadow:       theme.navShadow,
+            transition:      mounted ? NAV_TRANSITION : "none",
+          }}
+          className="relative z-10 flex h-16 items-center justify-between border-b px-4 backdrop-blur-xl sm:px-6"
+        >
+          <Link href="/" onClick={closeMenu} className="flex items-center">
+            <Image src="/logo-brown.svg" alt="Logo" width={375} height={174} loading="eager" className="h-9 w-auto object-contain" />
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+            style={{ color: theme.linkColor }}
+            className="relative flex h-11 w-11 items-center justify-center"
+          >
+            {/* Três linhas que viram um X */}
+            <span className={`absolute h-0.5 w-6 rounded-full bg-current transition-transform duration-300 ${menuOpen ? "rotate-45" : "-translate-y-2"}`} />
+            <span className={`absolute h-0.5 w-6 rounded-full bg-current transition-opacity duration-200 ${menuOpen ? "opacity-0" : "opacity-100"}`} />
+            <span className={`absolute h-0.5 w-6 rounded-full bg-current transition-transform duration-300 ${menuOpen ? "-rotate-45" : "translate-y-2"}`} />
+          </button>
+        </div>
+
+        {/* Menu: desce por baixo da barra (grid-rows anima a altura sem medir via JS) */}
+        <div
+          id="mobile-menu"
+          className={`grid transition-[grid-template-rows,opacity] duration-400 ease-out ${
+            menuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div
+              style={{ backgroundColor: theme.navBg, borderColor: theme.navBorder }}
+              className="border-b px-4 pb-6 pt-2 backdrop-blur-xl sm:px-6"
+            >
+              <ul>
+                {navLinks.map((link) => (
+                  <li key={link.href} style={{ borderColor: theme.separatorColor }} className="border-b">
+                    <a
+                      href={link.href}
+                      onClick={closeMenu}
+                      tabIndex={menuOpen ? 0 : -1}
+                      style={linkStyle}
+                      className="flex items-center justify-between py-4 text-lg"
+                    >
+                      {link.label}
+                      <ArrowIcon className="size-4 opacity-50" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                type="button"
+                onClick={closeMenu}
+                tabIndex={menuOpen ? 0 : -1}
+                className="group mt-6 flex h-12 w-full items-center justify-between rounded-full bg-[#EFE8DC] pl-6 pr-1.5 text-sm font-medium tracking-wide text-[#3B2A1E] transition-colors duration-300 hover:bg-white"
+              >
+                Ver Cardápio
+                <span className="flex size-9 items-center justify-center rounded-full bg-[#5C402E] text-[#EFE8DC] transition-transform duration-500 ease-out group-hover:-rotate-45">
+                  <ArrowIcon className="size-4" />
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Container com largura máxima — logo e CTA absolutos ficam dentro dele */}
-      <div className="relative mx-auto flex w-full max-w-480 items-center justify-center px-10 lg:px-20">
+      <div className="relative mx-auto hidden w-full max-w-480 items-center justify-center px-10 lg:flex lg:px-20">
 
       {/* ── Logo externo ─────────────────────────────────────── */}
       <Link
@@ -114,19 +227,14 @@ export default function Header() {
           island ? "-translate-x-5 opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
         }`}
       >
-        <img src="/logo.svg" alt="Logo" className="h-12 w-auto object-contain" />
+        <Image src="/logo-brown.svg" alt="Logo" width={375} height={174} loading="eager" className="h-12 w-auto object-contain" />
       </Link>
 
       {/* ── Nav ─────────────────────────────────────────────────
           Casca: CSS transition suave de cor
           Texto: crossfade de opacidade (nunca interpola cor visível) */}
       <nav
-        style={{
-          borderColor:     theme.navBorder,
-          backgroundColor: theme.navBg,
-          boxShadow:       theme.navShadow,
-          transition:      mounted ? NAV_TRANSITION : "none",
-        }}
+        style={shellStyle}
         className="flex h-14 items-center rounded-full border px-6 backdrop-blur-xl"
       >
         {/* Logo interno (ilha) */}
@@ -137,7 +245,7 @@ export default function Header() {
           }`}
         >
           <Link href="/" className="flex items-center pr-3">
-            <img src="/logo.svg" alt="Logo" className="h-7 w-auto object-contain" />
+            <Image src="/logo-brown.svg" alt="Logo" width={375} height={174} loading="eager" className="h-7 w-auto object-contain" />
           </Link>
           <span
             style={{ backgroundColor: theme.separatorColor, transition: mounted ? SEP_TRANSITION : "none" }}
@@ -184,25 +292,26 @@ export default function Header() {
         <div
           style={{ transitionDelay: island ? "100ms" : "0ms" }}
           className={`flex items-center overflow-hidden ${motion} ${
-            island ? "max-w-44 opacity-100" : "max-w-0 opacity-0 pointer-events-none"
+            island ? "max-w-56 opacity-100" : "max-w-0 opacity-0 pointer-events-none"
           }`}
         >
           <span
             style={{ backgroundColor: theme.separatorColor, transition: mounted ? SEP_TRANSITION : "none" }}
-            className="h-5 w-px shrink-0 ml-3"
+            className="h-5 w-px shrink-0 mx-3"
           />
           <button
             style={{
-              color:         theme.linkColor,
               fontFamily:    theme.fontFamily,
-              fontWeight:    theme.fontWeight,
               letterSpacing: theme.letterSpacing,
               opacity:       textVisible ? 1 : 0,
-              transition:    "opacity 160ms ease",
+              transition:    "opacity 160ms ease, background-color 300ms ease",
             }}
-            className="flex items-center whitespace-nowrap pl-3 pr-1 text-sm"
+            className="group flex h-9 items-center gap-2.5 whitespace-nowrap rounded-full bg-[#EFE8DC] pl-4 pr-1 text-sm font-medium text-[#3B2A1E] hover:bg-white"
           >
             Ver Cardápio
+            <span className="flex size-7 items-center justify-center rounded-full bg-[#5C402E] text-[#EFE8DC] transition-transform duration-500 ease-out group-hover:-rotate-45">
+              <ArrowIcon className="size-3.5" />
+            </span>
           </button>
         </div>
       </nav>
@@ -210,11 +319,14 @@ export default function Header() {
       {/* ── CTA externo ──────────────────────────────────────── */}
       <button
         style={{ transitionDelay: island ? "0ms" : "200ms" }}
-        className={`absolute right-10 lg:right-20 flex h-14 items-center gap-4 rounded-full border border-[#243b36] bg-[#2B4842]/85 px-9 text-sm font-light tracking-wide text-white shadow-sm backdrop-blur-xl hover:border-amber-300/60 hover:bg-[#2B4842] hover:shadow-[0_0_24px_rgba(43,72,66,0.5)] ${motion} ${
+        className={`group absolute right-10 lg:right-20 flex h-14 items-center gap-4 rounded-full bg-[#EFE8DC] pl-7 pr-2 text-sm font-medium tracking-wide text-[#3B2A1E] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.45)] ring-1 ring-inset ring-white/60 hover:bg-white hover:shadow-[0_14px_36px_-10px_rgba(150,108,66,0.7)] ${motion} ${
           island ? "translate-x-5 opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
         }`}
       >
         Ver Cardápio
+        <span className="flex size-10 items-center justify-center rounded-full bg-[#5C402E] text-[#EFE8DC] transition-transform duration-500 ease-out group-hover:-rotate-45">
+          <ArrowIcon className="size-4" />
+        </span>
       </button>
 
       </div>{/* fim do container max-w-360 */}

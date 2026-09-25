@@ -1,7 +1,7 @@
 /**
  * headerThemes.ts
  *
- * O header usa `defaultTheme` (pílula clara, fundo quase branco) em
+ * O header usa `defaultTheme` (pílula marrom escuro) em
  * TODO o site. Só troca onde for explicitamente modificado: adicione
  * data-header-theme="sua-chave" na section e registre a chave abaixo.
  * Chave não registrada = tema padrão.
@@ -34,42 +34,28 @@ export type HeaderTheme = {
   letterSpacing: string
 }
 
-// ── Tema padrão do site (fundo claro) ──────────────────────────
+// ── Tema padrão do site (marrom médio #5C402E) ─────────────────
 export const defaultTheme: HeaderTheme = {
-  navBorder:      "rgba(30, 20, 10, 0.12)",
-  navBg:          "rgba(255, 250, 245, 0.55)",
-  navShadow:      "0 1px 6px rgba(0,0,0,0.07)",
-  linkColor:      "rgba(30, 20, 10, 0.80)",
-  linkHoverColor: "rgba(30, 20, 10, 1)",
-  dotColor:       "rgba(30, 20, 10, 0.25)",
-  underlineColor: "rgba(180, 83, 9, 0.70)",
-  separatorColor: "rgba(30, 20, 10, 0.15)",
+  navBorder:      "rgba(239, 232, 220, 0.12)",
+  navBg:          "rgba(92, 64, 46, 0.85)",
+  navShadow:      "0 1px 6px rgba(0,0,0,0.20)",
+  linkColor:      "rgba(239, 232, 220, 0.85)",
+  linkHoverColor: "rgba(255, 255, 255, 1)",
+  dotColor:       "rgba(239, 232, 220, 0.25)",
+  underlineColor: "rgba(251, 191, 36, 0.70)",
+  separatorColor: "rgba(239, 232, 220, 0.15)",
   fontFamily:     "inherit",
   fontWeight:     "300",
   letterSpacing:  "0.05em",
 }
 
 export const headerThemes: Record<string, HeaderTheme> = {
-  // ── Section hero (vídeo escuro) ──────────────────────────────
-  hero: {
-    navBorder:      "rgba(255, 255, 255, 0.10)",
-    navBg:          "rgba(0, 0, 0, 0.25)",
-    navShadow:      "0 1px 6px rgba(0,0,0,0.15)",
-    linkColor:      "rgba(255, 255, 255, 0.85)",
-    linkHoverColor: "rgba(255, 255, 255, 1)",
-    dotColor:       "rgba(255, 255, 255, 0.20)",
-    underlineColor: "rgba(251, 191, 36, 0.70)",
-    separatorColor: "rgba(255, 255, 255, 0.15)",
-    fontFamily:     "inherit",
-    fontWeight:     "300",
-    letterSpacing:  "0.05em",
-  },
-
-  // ── Section about (fundo claro) — já é o padrão ──────────────
-  about: defaultTheme,
+  hero:   defaultTheme,
+  about:  defaultTheme,
+  footer: defaultTheme,
 
   // ── Adicione novas sections abaixo ───────────────────────────
-  // Só registre aqui quem precisa FUGIR do padrão claro:
+  // Só registre aqui quem precisa FUGIR do padrão marrom:
   // products: {
   //   navBorder:      "rgba(20, 40, 30, 0.15)",
   //   navBg:          "rgba(20, 40, 30, 0.75)",
@@ -84,3 +70,7 @@ export const headerThemes: Record<string, HeaderTheme> = {
   //   letterSpacing:  "0.05em",
   // },
 }
+
+// Sections de fundo marrom escuro também usam o tema padrão
+headerThemes.moments = headerThemes.footer
+headerThemes.process = headerThemes.footer
