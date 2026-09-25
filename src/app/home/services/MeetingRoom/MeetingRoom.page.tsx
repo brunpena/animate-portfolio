@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -82,7 +83,7 @@ export default function MeetingRoom() {
     >
 
       {/* Background image */}
-      <img src="/bgservice.png" alt="Meeting Room" className="absolute inset-0 z-0 w-full h-full object-cover" />
+      <Image src="/bgservice.webp" alt="Meeting Room" fill sizes="100vw" className="z-0 object-cover" />
 
       {/* objects for Decorations — círculos */}
       <div className="mr-circles object-decoretion absolute z-0 -top-15 -left-10 flex">
@@ -92,7 +93,7 @@ export default function MeetingRoom() {
 
       {/* J background */}
       <div className="object-decoretion hidden md:block absolute z-0 -right-20 bottom-40 translate-y-1/3">
-        <img src="/j.svg" alt="J" className="h-[120vh] w-auto" />
+        <Image src="/j.svg" alt="J" width={446} height={559} className="h-[120vh] w-auto" />
       </div>
 
       {/* conteúdo */}
@@ -134,9 +135,13 @@ export default function MeetingRoom() {
 
         {/* Direita: imagem centralizada */}
         <div className="flex items-center justify-center w-full md:w-auto">
-          <img
-            src="/meetRoom.png"
+          <Image
+            src="/meetRoom.webp"
             alt="Room"
+            width={1536}
+            height={1024}
+            // A imagem é 3:2, então a largura exibida é 1,5× a altura (35vh / 55vh)
+            sizes="(min-width: 768px) 83vh, 53vh"
             className="mr-image h-[35vh] md:h-[55vh] w-auto rounded-3xl shadow-2xl"
           />
         </div>

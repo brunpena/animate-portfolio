@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 interface ProductCardProps {
   image: string
   name: string
@@ -21,6 +23,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <div
+      data-reveal="scale"
       className="group relative shrink-0 cursor-pointer"
       style={{
         width: "clamp(17.5rem, 22vw, 26rem)",
@@ -120,9 +123,13 @@ export default function ProductCard({
       </div>
 
       {/* Imagem flutuando acima */}
-      <img
+      <Image
         src={image}
         alt={name}
+        width={800}
+        height={1200}
+        // Altura máxima de 14rem com proporção 2:3 → no máximo ~150px de largura
+        sizes="150px"
         className="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-auto object-contain drop-shadow-2xl transition-all duration-300 ease-out group-hover:-translate-y-3 group-hover:scale-105 group-hover:drop-shadow-[0_20px_30px_rgba(0,0,0,0.35)]"
         style={{ height: "clamp(8rem, 25vh, 14rem)" }}
       />

@@ -1,7 +1,7 @@
 export const products = [
   {
     id: 1,
-    image: "/products/fakeProduct.png",
+    image: "/products/fakeProduct.webp",
     name: "Chocolate Caramelo",
     pts: 84,
     tipo: "Arábica",
@@ -13,7 +13,7 @@ export const products = [
   },
   {
     id: 2,
-    image: "/products/fakeProduct.png",
+    image: "/products/fakeProduct.webp",
     name: "Laranja",
     pts: 84,
     tipo: "Arábica",
@@ -25,7 +25,7 @@ export const products = [
   },
   {
     id: 3,
-    image: "/products/fakeProduct.png",
+    image: "/products/fakeProduct.webp",
     name: "Mel e Limão",
     pts: 85,
     tipo: "Arábica",
