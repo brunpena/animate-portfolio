@@ -9,9 +9,10 @@ export default function BestSellersSection() {
     >
       
       <div className="relative z-10 w-full h-full flex items-center py-16">
-        <div className="w-full max-w-360 mx-auto px-10 lg:px-20">
+        <div className="w-full max-w-360 mx-auto px-6 md:px-10 lg:px-20">
           <h1
-            className="text-5xl flex items-center justify-center md:text-7xl font-bold mb-6 text-stone-800"
+            data-reveal
+            className="text-4xl sm:text-5xl flex items-center justify-center text-center md:text-7xl font-bold mb-6 text-stone-800"
             style={{ fontFamily: "var(--font-playfair)" }}
           >
             Mais Vendidos
