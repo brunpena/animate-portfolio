@@ -31,3 +31,21 @@ body {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
+
+/* FeedbacksSection (mobile) — cards passando em loop infinito */
+.feedbacks-marquee { animation: information-bar-scroll 45s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .feedbacks-marquee { animation: none; }
+}
+
+/* MomentsSection — texto do tópico entrando a cada troca */
+@keyframes moment-in {
+  from { opacity: 0; transform: translateY(28px); filter: blur(6px); }
+  to   { opacity: 1; transform: none;             filter: none; }
+}
+.moment-in { animation: moment-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .moment-in { animation: none; }
+}
