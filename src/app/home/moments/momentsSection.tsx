@@ -82,7 +82,7 @@ export default function MomentsSection() {
     <section
       ref={sectionRef}
       id="moments"
-      className="moments-section relative z-10 h-svh w-full overflow-hidden bg-[#2B2018]"
+      className="moments-section relative z-10 h-lvh w-full overflow-hidden bg-[#2B2018]"
       data-header-theme="moments"
     >
       {/* Fundo: fotos empilhadas em tela cheia, só a ativa aparece (fade + zoom) */}
@@ -107,7 +107,7 @@ export default function MomentsSection() {
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-[#2B2018]/80 to-transparent" />
 
       {/* Texto na frente das fotos */}
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-360 flex-col justify-between gap-8 px-6 pt-32 pb-10 md:px-10 lg:px-20 lg:pt-36 lg:pb-16">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-360 flex-col justify-between gap-8 px-6 pt-32 pb-[calc(100lvh-100svh+2.5rem)] md:px-10 lg:px-20 lg:pt-36 lg:pb-16">
         <SectionHeading
           eyebrow="Quando aproveitar o Java Café"
           title="Perfeito para..."
