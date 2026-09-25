@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { defaultTheme, headerThemes, type HeaderTheme } from "./headerThemes"
 
 const navLinks = [
@@ -15,44 +15,76 @@ const navLinks = [
 const NAV_TRANSITION   = "background-color 500ms ease, border-color 500ms ease, box-shadow 500ms ease"
 // Separadores internos (linhas divisórias)
 const SEP_TRANSITION   = "background-color 500ms ease"
+// Entrada/saída do logo e do CTA externos
+const SHAPE_TRANSITION = "transition-all duration-500 ease-in-out"
+
+// No cliente roda antes do primeiro paint pós-hidratação (evita flash);
+// no servidor cai para useEffect só para não emitir warning no SSR
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect
+
+// Quanto da altura do elemento está dentro da viewport (0 → 1).
+// Espelha o threshold 0.5 do IntersectionObserver, de forma síncrona.
+const visibleRatio = (el: Element) => {
+  const r = el.getBoundingClientRect()
+  if (!r.height) return 0
+  return Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0)) / r.height
+}
 
 export default function Header() {
   const [island,      setIsland]      = useState(false)
   const [theme,       setTheme]       = useState<HeaderTheme>(defaultTheme)
   const [textVisible, setTextVisible] = useState(true)
+  // Enquanto false, o primeiro estado é aplicado sem animação nenhuma
+  const [mounted,     setMounted]     = useState(false)
+  const themeRef = useRef<HeaderTheme>(defaultTheme)
 
   // ── Island ──────────────────────────────────────────────────
-  useEffect(() => {
-    const check = () => {
-      const hero = document.querySelector(".hero-section")
-      if (!hero) return
-      setIsland(hero.getBoundingClientRect().bottom <= 0)
-    }
+  // Sem .hero-section na página, a ilha é o estado padrão
+  useIsomorphicLayoutEffect(() => {
+    const hero = document.querySelector(".hero-section")
+
+    const check = () => setIsland(!hero || hero.getBoundingClientRect().bottom <= 0)
+
     check()
+    setMounted(true)
+
+    if (!hero) return // nada para observar: a ilha fica fixa
     window.addEventListener("scroll", check, { passive: true })
     return () => window.removeEventListener("scroll", check)
   }, [])
 
   // ── Tema por section ─────────────────────────────────────────
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const sections = document.querySelectorAll<HTMLElement>("[data-header-theme]")
+    let timer = 0
 
-    const applyTheme = (key: string) => {
-      const next = headerThemes[key] ?? defaultTheme
+    // Chave não registrada (ou section sem chave) cai no tema padrão
+    const themeOf = (el: Element) =>
+      headerThemes[el.getAttribute("data-header-theme") ?? ""] ?? defaultTheme
+
+    const applyTheme = (next: HeaderTheme) => {
+      if (next === themeRef.current) return
+      themeRef.current = next
       // Sempre usa crossfade: texto some → cores trocam → texto volta
       // Assim a cor nunca interpola visível (evita artefato de tamanho)
       setTextVisible(false)
-      setTimeout(() => {
+      timer = window.setTimeout(() => {
         setTheme(next)
         setTextVisible(true)
       }, 160)
     }
 
+    // Tema de abertura aplicado de uma vez, sem crossfade — senão a página
+    // abriria no padrão claro e só trocaria 160ms depois
+    const opening = Array.from(sections).find((s) => visibleRatio(s) >= 0.5)
+    themeRef.current = opening ? themeOf(opening) : defaultTheme
+    setTheme(themeRef.current)
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            applyTheme(entry.target.getAttribute("data-header-theme") ?? "hero")
+            applyTheme(themeOf(entry.target))
           }
         }
       },
@@ -60,8 +92,13 @@ export default function Header() {
     )
 
     sections.forEach((s) => observer.observe(s))
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      clearTimeout(timer)
+    }
   }, [])
+
+  const motion = mounted ? SHAPE_TRANSITION : ""
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-5">
@@ -73,7 +110,7 @@ export default function Header() {
       <Link
         href="/"
         style={{ transitionDelay: island ? "0ms" : "200ms" }}
-        className={`absolute left-10 lg:left-20 flex h-12 items-center px-5 transition-all duration-500 ease-in-out ${
+        className={`absolute left-10 lg:left-20 flex h-12 items-center px-5 ${motion} ${
           island ? "-translate-x-5 opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
         }`}
       >
@@ -88,14 +125,14 @@ export default function Header() {
           borderColor:     theme.navBorder,
           backgroundColor: theme.navBg,
           boxShadow:       theme.navShadow,
-          transition:      NAV_TRANSITION,
+          transition:      mounted ? NAV_TRANSITION : "none",
         }}
         className="flex h-14 items-center rounded-full border px-6 backdrop-blur-xl"
       >
         {/* Logo interno (ilha) */}
         <div
           style={{ transitionDelay: island ? "100ms" : "0ms" }}
-          className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
+          className={`flex items-center overflow-hidden ${motion} ${
             island ? "max-w-40 opacity-100" : "max-w-0 opacity-0 pointer-events-none"
           }`}
         >
@@ -103,7 +140,7 @@ export default function Header() {
             <img src="/logo.svg" alt="Logo" className="h-7 w-auto object-contain" />
           </Link>
           <span
-            style={{ backgroundColor: theme.separatorColor, transition: SEP_TRANSITION }}
+            style={{ backgroundColor: theme.separatorColor, transition: mounted ? SEP_TRANSITION : "none" }}
             className="h-5 w-px shrink-0 mr-3"
           />
         </div>
@@ -146,12 +183,12 @@ export default function Header() {
         {/* CTA interno (ilha) */}
         <div
           style={{ transitionDelay: island ? "100ms" : "0ms" }}
-          className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
+          className={`flex items-center overflow-hidden ${motion} ${
             island ? "max-w-44 opacity-100" : "max-w-0 opacity-0 pointer-events-none"
           }`}
         >
           <span
-            style={{ backgroundColor: theme.separatorColor, transition: SEP_TRANSITION }}
+            style={{ backgroundColor: theme.separatorColor, transition: mounted ? SEP_TRANSITION : "none" }}
             className="h-5 w-px shrink-0 ml-3"
           />
           <button
@@ -173,7 +210,7 @@ export default function Header() {
       {/* ── CTA externo ──────────────────────────────────────── */}
       <button
         style={{ transitionDelay: island ? "0ms" : "200ms" }}
-        className={`absolute right-10 lg:right-20 flex h-14 items-center gap-4 rounded-full border border-[#243b36] bg-[#2B4842]/85 px-9 text-sm font-light tracking-wide text-white shadow-sm backdrop-blur-xl transition-all duration-500 ease-in-out hover:border-amber-300/60 hover:bg-[#2B4842] hover:shadow-[0_0_24px_rgba(43,72,66,0.5)] ${
+        className={`absolute right-10 lg:right-20 flex h-14 items-center gap-4 rounded-full border border-[#243b36] bg-[#2B4842]/85 px-9 text-sm font-light tracking-wide text-white shadow-sm backdrop-blur-xl hover:border-amber-300/60 hover:bg-[#2B4842] hover:shadow-[0_0_24px_rgba(43,72,66,0.5)] ${motion} ${
           island ? "translate-x-5 opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
         }`}
       >
